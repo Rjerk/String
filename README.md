@@ -36,7 +36,7 @@
 - capacity (1/1)
 - shrink_to_fit (1/1)
 - clear (1/1)
-- insert (1/11)
+- insert (6/11)
 - erase (3/5)
 - push_back (1/1)
 - pop_back (1/1)
