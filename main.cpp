@@ -112,7 +112,13 @@ int main()
 		s.insert(1, 1, 'c');
 		cout << s << endl; // 1c234ab
 		s.insert(1, 10, 'a');
-		cout << s << "\n\n"; // 1aaaaaaaaaac234ab
+		cout << s << endl; // 1aaaaaaaaaac234ab
+		String s2("123");
+		s2.insert(1, "abc", 2);
+		cout << s2 << endl; // 1ab23
+		String s3("123");
+		s3.insert(s3.begin(), 4, 'c');
+		cout << s3 << "\n\n"; // cccc123
 	}
 	{
 		String s("1234");

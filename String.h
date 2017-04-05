@@ -411,33 +411,53 @@ String& String::insert(size_type index, const char* s)
 	return this->insert(index, s, strlen(s));
 }
 
-String& String::insert(size_type index, const char* s, size_type count) //
+String& String::insert(size_type index, const char* s, size_type count)
 {
 	if (index > this->size())
 		throw std::out_of_range("String::insert");
-	//
+	if (index == size_) this->append(s, count);
+	if (count > strlen(s)) count = strlen(s);
+	size_type pos = size_ - 1;
+	size_ += count;
+	if (size_ > capacity_) 
+		reallocate(size_);
+	for (size_type i = pos; i >= index; --i) // BUGs here
+		data_[i+count] = data_[i];
+	for (size_type i = 0; i < count; ++i)
+		data_[index++] = s[i];
+	return *this;
 }
 
 String& String::insert(size_type index, const String& str)
 {
-	return this->insert(index, str, 0, str.size());
+	return this->insert(index, str.c_str(), str.size());
 }
 
-String& String::insert(size_type index, const String& str, size_type index_str, size_type count) //
+String& String::insert(size_type index, const String& str, size_type index_str, size_type count)
 {
-	if (index > this->size())
+	if (index > this->size() || index_str > this->size())
 		throw std::out_of_range("String::insert");
-	//
+	return this->insert(index, str.substr(index_str, count));
 }
 
 iterator String::insert(iterator pos, char ch)
 {
-	
+	this->insert(pos, 1, ch);
+	return pos;
 }
 
-void String::insert(iterator pos, size_type count, char ch)
+void String::insert(iterator pos, size_type count, char ch) // BUGs here
 {
-	
+	if (count == 0) return ;
+	size_type index = pos-begin();
+	size_type p = size_ - 1;
+	if (size_ + count > capacity_)
+		reallocate(size_+count);
+	for (size_type i = p; i >= index; --i) {
+		data_[i+count] = data_[i];
+	}
+	for (size_type i = 0; i < count; ++i)
+		data_[index++] = ch;
 }
 
 String& String::erase(size_type index, size_type count)
