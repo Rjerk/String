@@ -187,7 +187,7 @@ private:
 
 // Constructor
 String::String():
-	data_(NULL), size_(0), capacity_(0)
+	data_(nullptr), size_(0), capacity_(0)
 {
 }
 
@@ -377,8 +377,13 @@ void String::reserve(size_type new_cap)
 
 void String::shrink_to_fit()
 {
-	if (size_ < capacity_)
-		reallocate(size_);
+	if (size_ < capacity_) {
+		char* tmp = new char[size_];
+		memcpy(tmp, data_, size_);
+		data_ = tmp;
+		tmp = nullptr;
+		capacity_ = size_;
+	}
 }
 
 // Operation
@@ -398,7 +403,7 @@ String& String::insert(size_type index, size_type count, char ch)
 	size_ = size_ + count;
 	if (size_ > capacity_)
 		reallocate(size_);
-	
+
 	for (size_type i = size_ - 1; pos >= index;)
 		data_[i--] = data_[pos--];
 	for (size_type i = 0; i < count; ++i)
@@ -415,16 +420,16 @@ String& String::insert(size_type index, const char* s, size_type count)
 {
 	if (index > this->size())
 		throw std::out_of_range("String::insert");
-	if (index == size_) this->append(s, count);
+	if (index == size_) return this->append(s, count);
 	if (count > strlen(s)) count = strlen(s);
-	size_type pos = size_ - 1;
+	size_type len = size_ - index;
 	size_ += count;
-	if (size_ > capacity_) 
+	if (size_ > capacity_)
 		reallocate(size_);
-	for (size_type i = pos; i >= index; --i) // BUGs here
-		data_[i+count] = data_[i];
-	for (size_type i = 0; i < count; ++i)
-		data_[index++] = s[i];
+	char* tmp = new char[len];
+	memcpy(tmp, data_+index, len);
+	memcpy(data_+index, s, count);
+	memcpy(data_+index+count, tmp, len);
 	return *this;
 }
 
@@ -446,18 +451,15 @@ iterator String::insert(iterator pos, char ch)
 	return pos;
 }
 
-void String::insert(iterator pos, size_type count, char ch) // BUGs here
+void String::insert(iterator pos, size_type count, char ch)
 {
 	if (count == 0) return ;
-	size_type index = pos-begin();
-	size_type p = size_ - 1;
 	if (size_ + count > capacity_)
 		reallocate(size_+count);
-	for (size_type i = p; i >= index; --i) {
-		data_[i+count] = data_[i];
-	}
-	for (size_type i = 0; i < count; ++i)
-		data_[index++] = ch;
+	char* tmp = new char[size_];
+	memcpy(tmp, data_, size_);
+	memset(data_, ch, count);
+	memcpy(data_+count, tmp, size_);
 }
 
 String& String::erase(size_type index, size_type count)
@@ -539,7 +541,7 @@ String& String::append(const String& str, size_type pos, size_type count)
 	size_ += count;
 	if (size_ > capacity_)
 		reallocate(size_);
-	for (int i = 0; i < count; ++i)
+	for (size_type i = 0; i < count; ++i)
 		data_[sz++] = str.data_[pos++];
 	return *this;
 }
@@ -634,7 +636,7 @@ int String::compare(size_type pos1, size_type count1, const char* s) const
 
 int String::compare(size_type pos1, size_type count1, const char* s, size_type count2) const
 {
-	if (pos1 > this->size()) 
+	if (pos1 > this->size())
 		throw std::out_of_range("String::compare");
 	String tmp(s, count2);
 	return this->substr(pos1, count1).compare(tmp);
@@ -808,7 +810,7 @@ size_type String::find_first_of(const char* s, size_type pos, size_type count) c
 				if (data_[i] == s[j])
 					return i;
 			}
-		} 
+		}
 	}
 	return npos;
 }
@@ -902,7 +904,7 @@ size_type String::find_last_not_of(const char* s, size_type pos, size_type count
 	if (size_ > 0) {
 		if (pos > size_) pos = size_ - 1;
 		if (count > strlen(s)) count = strlen(s);
-		
+
 		for (size_type i = pos; i >= 0; --i) {
 			bool found = false;
 			for (size_type j = 0; j < count; ++j) {
@@ -936,21 +938,22 @@ size_type String::find_last_not_of(char ch, size_type pos) const
 	return npos;
 }
 
-// helper: reallocate the memory.
-void String::reallocate(size_type size)
+// helper: reallocate the memory for new size: sz
+void String::reallocate(size_type sz)
 {
-	if (size * 2 > maxsize_) 
-		throw std::length_error("String::expand(size_type size)");
-	size_type original_sz = size_;
-	size_ = size;
-	if (size_ > capacity_ && size_ < 2*capacity_ && capacity_ != 0)
-		capacity_ *= 2;
-	else
-		capacity_ = size;
+	assert(sz >= 0);
+	if (capacity_ == 0) capacity_ = sz;
+	while (capacity_ <= sz) {
+		capacity_ += (capacity_ >> 1);
+	}
+	if (capacity_ > maxsize_)
+		throw std::length_error("String::reallocate(size_type size)");
 	char* tmp = new char[capacity_];
-	memcpy(tmp, data_, original_sz);
+	memcpy(tmp, data_, size_);
+	//tmp[original_sz] = '\0';
 	delete [] data_;
 	data_ = tmp;
+	size_ = sz;
 	tmp = nullptr;
 }
 
@@ -1112,7 +1115,7 @@ void swap(String& lhs, String& rhs) noexcept
 
 std::ostream& operator<<(std::ostream& os, const String& rhs)
 {
-	for (int i = 0; i < rhs.size(); ++i)
+	for (size_type i = 0; i < rhs.size(); ++i)
 		os << rhs.data_[i];
 	return os;
 }

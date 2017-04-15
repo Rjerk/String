@@ -85,4 +85,4 @@
 - operator""s (x)
 
 ### Helper classes
-- std::hash<std::string> (x)
+- std::hash<\std::string> (x)

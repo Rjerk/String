@@ -74,7 +74,7 @@ int main()
 		s = "12345";
 		cout << s << " " << s.size() << " " << s.capacity() << endl; // 12345 5 8
 		s = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'};
-		cout << s << " " << s.size() << " " << s.capacity() << "\n\n"; // abcdefghi 9 16
+		cout << s << " " << s.size() << " " << s.capacity() << "\n\n"; // abcdefghi 9 13
 	}
 	{
 		String s("1234567890000");
@@ -89,6 +89,7 @@ int main()
 		cout << s << endl; // 1234567890000  ccccc
 		s.clear();
 		cout << s << endl; // null
+		cout << "size():" << s.size() << endl; // 0
 		cout << "capacity(): " << s.capacity() << endl; // 26
 		s.shrink_to_fit();
 		cout << "capacity(): " << s.capacity() << "\n\n"; // 0
@@ -114,7 +115,7 @@ int main()
 		s.insert(1, 10, 'a');
 		cout << s << endl; // 1aaaaaaaaaac234ab
 		String s2("123");
-		s2.insert(1, "abc", 2);
+		s2.insert(0, "abc", 2);
 		cout << s2 << endl; // 1ab23
 		String s3("123");
 		s3.insert(s3.begin(), 4, 'c');
@@ -169,7 +170,7 @@ int main()
 		char str[7];
 		int i = s.copy(str, 3, 2);
 		str[i] = '\0';
-		cout << str << "\n\n"; // 234
+		cout << str << "\n\n"; // 345
 	}
 	{
 		String s1("123");
