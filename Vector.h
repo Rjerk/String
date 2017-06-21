@@ -2,7 +2,6 @@
 #define MY_VECTOR_H
 
 #include <initializer_list> // initializer_list
-#include <memory> // unique_ptr
 #include <iterator>
 #include <algorithm>
 #include <utility>
