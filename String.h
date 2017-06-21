@@ -13,6 +13,8 @@ using std::cout;
 using std::cin;
 using std::endl;
 
+namespace mystl {
+
 using size_type = std::uint32_t;
 using iterator = char *;
 
@@ -1189,6 +1191,8 @@ String to_string(long double value)
 	char buf[100];
 	std::sprintf(buf, "%lf", value);
 	return String(buf);
+}
+
 }
 
 #endif

@@ -1,4 +1,4 @@
-#include "String.h"
+#include "../String.h"
 #include <ios>
 
 int main()
@@ -38,10 +38,10 @@ int main()
 
 		String s10(3, 'c');
 		cout << s10 << "\n\n"; // ccc
-		
+
 		String s11(s1.begin(), s1.end());
 		cout << s11 << "\n\n"; // 1234567890
-		
+
 		String s12({'1', '2', '3', 'a', 'b'});
 		cout << s12 << "\n\n"; // 123ab
 	}
@@ -211,27 +211,27 @@ int main()
 		cout << s1.find("34", 1) << endl; // 2
 		cout << s1.find("34", 0, 1) << endl; //2
 		cout << s1.find('3', 1) << endl; // 2
-		
+
 		cout << s1.rfind(s2, 4) << endl; // 2
 		cout << s1.rfind("45") << endl; // 3
 		cout << s1.rfind("23", 4, 1) << endl; // 1
 		cout << s1.rfind('2', 3) << endl; // 1
-		
+
 		cout << s1.find_first_of(s2, 0) << endl; // 2
 		cout << s1.find_first_of("56", 0, 3) << endl; // 4
 		cout << s1.find_first_of("45", 4) << endl; // 4
 		cout << s1.find_first_of('2', 2) << endl; // npos
-		
+
 		cout << s1.find_first_not_of(s2, 2) << endl; // 4
 		cout << s1.find_first_not_of("56", 0, 3) << endl; // 0
 		cout << s1.find_first_not_of("45", 4) << endl; // 5
 		cout << s1.find_first_not_of('1', 2) << endl; // 2
-		
+
 		cout << s1.find_last_of(s2, 5) << endl; // 3
 		cout << s1.find_last_of("56", 5, 3) << endl; // 5
 		cout << s1.find_last_of("45", 4) << endl; // 4
 		cout << s1.find_last_of('2', 2) << endl; // 1
-		
+
 		cout << s1.find_last_not_of(s2, 5) << endl; // 5
 		cout << s1.find_last_not_of("56", 5, 3) << endl; // 3
 		cout << s1.find_last_not_of("45", 4) << endl; // 2
