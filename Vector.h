@@ -635,7 +635,7 @@ template <typename T, typename Allocator>
 template <typename... Args>
 void Vector<T, Allocator>::emplace_back(Args&&...args)
 {
-
+	Allocator::construct()
 }
 
 template <typename T, typename Allocator>
