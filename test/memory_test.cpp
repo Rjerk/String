@@ -26,7 +26,8 @@ void f(int** p)
 
 int main()
 {
-    Ptr<int> p(new int(35));
-    f(&p);
-    f(mystl::addressof(p));
+//    Ptr<int> p(new int(35));
+//    f(&p);
+//    f(mystl::addressof(p));
+	
 }
