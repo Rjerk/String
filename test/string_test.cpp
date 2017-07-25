@@ -1,6 +1,12 @@
 #include "../String.h"
 #include <ios>
 
+using std::cout;
+using std::cin;
+using std::endl;
+
+using namespace mystl;
+
 int main()
 {
 	{
