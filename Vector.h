@@ -8,7 +8,7 @@
 #include <memory>
 #include <algorithm>
 #include <iostream>
-#include "iterator.h"
+#include "Iterator.h"
 
 namespace mystl {
 
@@ -103,7 +103,7 @@ public:
 	iterator insert(const_iterator pos, T&& value);
 	iterator insert(const_iterator pos, size_type count, const T& value);
 
-	template <typename InputIt, typename = std::enable_if_t<has_iterator_deref<T>::value>>
+	template <typename InputIt, typename = RequireInputIterator<InputIt>>
 	iterator insert(const_iterator pos, InputIt first, InputIt last);
 
 	iterator insert(const_iterator pos, std::initializer_list<T> ilist);

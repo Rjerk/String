@@ -62,23 +62,6 @@ using RequireInputIterator =
 													std::input_iterator_tag>::value
 								>::type;
 
-template <class ... T> using void_t = void;
-
-template <class T, class = void>
-struct has_iterator_deref : std::false_type { };
-
-template <bool B, class T = void>
-using enable_if_t = typename std::enable_if<B, T>::type;
-
-template <class T>
-struct has_iterator_deref<T, std::enable_if_t<
-											std::is_same<typename std::iterator_traits<T>::reference,
-								            	    	 decltype(*std::declval<T>())>::value
-										>
-						> : std::true_type { };
-
-
-
 template <typename InputIterator, class Distance>
     void advance(InputIterator& i, Distance n);
 template <typename InputIterator>

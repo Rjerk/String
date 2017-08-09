@@ -423,7 +423,7 @@ Vector<T, Allocator>::insert(const_iterator pos, size_type count, const T& value
 }
 
 template <typename T, typename Allocator>
-template <typename InputIt, typename = std::enable_if_t<has_iterator_deref<T>::value>>
+template <typename InputIt, typename>
 typename Vector<T, Allocator>::iterator
 Vector<T, Allocator>::insert(const_iterator pos, InputIt first, InputIt last)
 {
@@ -437,7 +437,7 @@ Vector<T, Allocator>::insert(const_iterator pos, InputIt first, InputIt last)
 	}
 	return p - (last-first);
 }
-	
+
 template <typename T, typename Allocator>
 typename Vector<T, Allocator>::iterator
 Vector<T, Allocator>::insert(const_iterator pos, std::initializer_list<T> ilist)

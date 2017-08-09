@@ -135,12 +135,12 @@ int main()
 		v.insert(v.cbegin(), 1);
 		q(v);
 		cout << v.size() << " " << v.capacity() << "\n";
-		v.insert(v.cend(), (size_t) 3, 4);
+		v.insert(v.cend(), 3, 4);
 		q(v);
-//		Vector<int> tmp = {100, 101, 102};
-//		auto iter = v.insert(v.cbegin()+1, {100, 101, 102});
-//		q(v);
-//		cout << *iter << endl;
+		Vector<int> tmp = {100, 101, 102};
+		auto iter = v.insert(v.cend(), tmp.cbegin(), tmp.cend());
+		q(v);
+		cout << *iter << endl;
 	}
 	{
 		cout << "\nerase\n";
