@@ -395,114 +395,52 @@ void Vector<T, Allocator>::clear() noexcept
 
 template <typename T, typename Allocator>
 typename Vector<T, Allocator>::iterator
-Vector<T, Allocator>::insert(iterator pos, const T& value)
+Vector<T, Allocator>::insert(const_iterator pos, const T& value)
 {
-	if (first_free != end_of_storage) {
-		Allocator::construct(first_free, *(first_free-1));
-		++first_free;
-		copyBackward(pos, first_free-2, first_free-1);
-		Allocator::construct(pos, value);
-	} else {
-		const size_type old_size = size();
-		const size_type len = old_size != 0 ? 2 * old_size : 1;
-
-		iterator new_start = Allocator::allocate(len);
-		iterator new_finish = new_start;
-		try {
-			new_finish = std::uninitialized_copy(elements, pos, new_start);
-			Allocator::construct(new_start, value);
-			++new_finish;
-			new_finish = std::uninitialized_copy(pos, first_free, new_finish);
-		} catch (...) {
-			doDestroy(new_start, new_finish);
-			Allocator::deallocate(new_start, len);
-			throw;
-		}
-
-		doDestroy(begin(), end());
-		doDeallocate();
-
-		elements = new_start;
-		first_free = new_finish;
-		end_of_storage = new_start + len;
-	}
-}
-
-//template <typename T, typename Allocator>
-//typename Vector<T, Allocator>::iterator
-//Vector<T, Allocator>::insert(const_iterator pos, T&& value)
-//{
-//	cout << "T&&\n";
-//	// insert(pos, std::move(value));
-//	if (first_free != end_of_storage) {
-//		Allocator::construct(first_free, *(first_free-1));
-//		++first_free;
-//		copyBackward(pos, first_free-2, first_free-1);
-//		Allocator::construct(pos, value);
-//	} else {
-//
-//	}
-//}
-
-template <typename T, typename Allocator>
-typename Vector<T, Allocator>::iterator
-Vector<T, Allocator>::insert(iterator pos, size_type count, const T& value)
-{
-	if (count != 0) {
-		if (size_type(end_of_storage - first_free) > 0) {
-			T value_copy = value;
-			const size_type elems_after = first_free - pos;
-			iterator old_finish = first_free;
-			if (elems_after > 0) {
-				std::uninitialized_copy(first_free-count, first_free, first_free);
-				first_free += count;
-				std::copy_backward(pos, old_finish-count, old_finish);
-				std::fill(pos, pos+count, value_copy);
-			} else {
-				std::uninitialized_fill_n(first_free, count-elems_after, value_copy);
-				first_free += (count - elems_after);
-				std::uninitialized_copy(pos, old_finish, first_free);
-				first_free += elems_after;
-				std::fill(pos, old_finish, value_copy);
-			}
-		} else {
-			const size_type old_size = size();
-			const size_type len = old_size + std::max(old_size, size_type(0));
-			iterator new_elem = Allocator::allocate(len);
-			iterator new_free = new_elem;
-
-			try {
-				new_free = std::uninitialized_copy(elements, pos, new_elem);
-				std::uninitialized_fill_n(new_free, count, value);
-				new_free += count;
-				new_free = std::uninitialized_copy(pos, first_free, new_free);
-			} catch (...) {
-				doDestroy(new_elem, new_free);
-				Allocator::deallocate(new_elem, len);
-				throw ;
-			}
-
-			doDestroy(elements, first_free);
-			doDeallocate();
-
-			elements = new_elem;
-			first_free = new_free;
-			end_of_storage = new_elem + len;
-		}
-	}
+	auto c = value;
+	return emplace(pos, std::move(c));
 }
 
 template <typename T, typename Allocator>
-template <typename InputIt>
 typename Vector<T, Allocator>::iterator
-Vector<T, Allocator>::insert(iterator pos, InputIt first, InputIt last)
+Vector<T, Allocator>::insert(const_iterator pos, T&& value)
 {
-	
+	return emplace(pos, std::move(value));
+}
+
+template <typename T, typename Allocator>
+typename Vector<T, Allocator>::iterator
+Vector<T, Allocator>::insert(const_iterator pos, size_type count, const T& value)
+{
+	auto p = const_cast<iterator>(pos);
+	if (count == 0) {
+		return p;
+	}
+	for (size_type i = 0; i < count; ++i) {
+		p = insert(p, value);
+	}
+	return p;
+}
+
+template <typename T, typename Allocator>
+template <typename InputIt, typename = std::enable_if_t<has_iterator_deref<T>::value>>
+typename Vector<T, Allocator>::iterator
+Vector<T, Allocator>::insert(const_iterator pos, InputIt first, InputIt last)
+{
+	auto p = const_cast<iterator>(pos);
+	if (first == last) {
+		return p;
+	}
+	for (auto iter = first; iter != last; ++iter) {
+		p = insert(p, *iter);
+		++p;
+	}
+	return p - (last-first);
 }
 	
 template <typename T, typename Allocator>
 typename Vector<T, Allocator>::iterator
-Vector<T, Allocator>::insert(iterator pos, std::initializer_list<T> ilist)
+Vector<T, Allocator>::insert(const_iterator pos, std::initializer_list<T> ilist)
 {
 	return insert(pos, ilist.begin(), ilist.end());
 }
@@ -510,16 +448,24 @@ Vector<T, Allocator>::insert(iterator pos, std::initializer_list<T> ilist)
 template <typename T, typename Allocator>
 template <typename... Args>
 typename Vector<T, Allocator>::iterator
-Vector<T, Allocator>::emplace(iterator pos, Args&&... args)
+Vector<T, Allocator>::emplace(const_iterator pos, Args&&... args)
 {
-	auto n = first_free - pos;
-	if ((first_free == capacity) || (pos < end_of_storage)) {
-		// ...
-	} else {
-		::new ((void*)first_free) value_type(std::forward<Args>(args)...);
-		++first_free;
+	if (pos < cbegin() && pos > cend()) {
+		throw std::out_of_range("Vector::emplace");
 	}
-	// ...
+	auto n = pos - cbegin();
+	checkAndExpand(); // if expand, all iterators are invalidated.
+	auto p = elements + n;
+
+	if (p == first_free) {
+		Allocator::construct(first_free++, std::forward<Args>(args)...);
+		return first_free - 1;
+	} else { // p < cend()
+		copyBackward(p, first_free-1, first_free);
+		++first_free;
+		*p = value_type(std::forward<Args>(args)...);
+	}
+	return p;
 }
 
 template <typename T, typename Allocator>

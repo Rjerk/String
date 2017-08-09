@@ -1,5 +1,5 @@
 #include "../String.h"
-#include <ios>
+#include <iostream>
 
 using std::cout;
 using std::cin;

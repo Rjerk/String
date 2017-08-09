@@ -2,6 +2,10 @@
 #define MY_ITERATOR_H
 
 #include <cstddef>
+#include <initializer_list>
+#include <utility>
+#include <type_traits>
+#include <iterator>
 
 namespace mystl {
 
@@ -51,6 +55,29 @@ struct iterator_traits<const T*> {
 	using pointer = const T*;
 	using reference = const T&;
 };
+
+template <typename InputIterator>
+using RequireInputIterator =
+		typename std::enable_if<std::is_convertible<typename std::iterator_traits<InputIterator>::iterator_category,
+													std::input_iterator_tag>::value
+								>::type;
+
+template <class ... T> using void_t = void;
+
+template <class T, class = void>
+struct has_iterator_deref : std::false_type { };
+
+template <bool B, class T = void>
+using enable_if_t = typename std::enable_if<B, T>::type;
+
+template <class T>
+struct has_iterator_deref<T, std::enable_if_t<
+											std::is_same<typename std::iterator_traits<T>::reference,
+								            	    	 decltype(*std::declval<T>())>::value
+										>
+						> : std::true_type { };
+
+
 
 template <typename InputIterator, class Distance>
     void advance(InputIterator& i, Distance n);
@@ -239,11 +266,11 @@ protected:
 template <typename Container>
 back_insert_iterator<Container> back_inserted(Container& x)
 {
-	return back_inserter_iterator<Container>(x);
+	return back_insert_iterator<Container>(x);
 }
 
 template <typename Container>
-class front_insert_iterator: public interator<output_iterator_tag, void, void, void, void> {
+class front_insert_iterator: public iterator<output_iterator_tag, void, void, void, void> {
 public:
 	using container_type = Container;
 	explicit front_insert_iterator(Container& x): container(addressof(x)) {	}
@@ -281,7 +308,7 @@ front_insert_iterator<Container> front_inserter(Container& x)
 }
 
 template <typename Container>
-class insert_iterator: public interator<output_iterator_tag, void, void, void, void> {
+class insert_iterator: public iterator<output_iterator_tag, void, void, void, void> {
 public:
 	using container_type = Container;
 	explicit insert_iterator(Container& x, typename Container::iterator i)
@@ -420,25 +447,25 @@ reverse_iterator<T*> rend(T (&array)[N])
 }
 
 template <class E>
-reverse_iterator<const E*> rbegin(initializer_list<E> il)
+reverse_iterator<const E*> rbegin(std::initializer_list<E> il)
 {
 	
 }
 
 template <class E>
-reverse_iterator<const E*> rend(initializer_list<E> il)
+reverse_iterator<const E*> rend(std::initializer_list<E> il)
 {
 	
 }
 
 template <class C>
-auto crbegin(const C& c) -> decltype(std::rbegin(c))
+auto crbegin(const C& c) -> decltype(rbegin(c))
 {
 	
 }
 
 template <class C>
-auto crend(const C& c) -> decltype(std::rend(c))
+auto crend(const C& c) -> decltype(rend(c))
 {
 	
 }

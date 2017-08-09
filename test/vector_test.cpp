@@ -129,12 +129,18 @@ int main()
 		v.reserve(10);
 		v.assign({1, 2, 3});
 		int a = 10;
-		cout << v.size() << " " << v.capacity() << "\n";
-		v.insert(v.begin(), 1);
-		cout << v.size() << " " << v.capacity() << "\n";
+		v.insert(v.cbegin(), a);
 		q(v);
-		v.insert(v.end()-1, 10, 4);
+		cout << v.size() << " " << v.capacity() << "\n";
+		v.insert(v.cbegin(), 1);
 		q(v);
+		cout << v.size() << " " << v.capacity() << "\n";
+		v.insert(v.cend(), (size_t) 3, 4);
+		q(v);
+//		Vector<int> tmp = {100, 101, 102};
+//		auto iter = v.insert(v.cbegin()+1, {100, 101, 102});
+//		q(v);
+//		cout << *iter << endl;
 	}
 	{
 		cout << "\nerase\n";
@@ -167,6 +173,14 @@ int main()
 	        std::cout << president.name << " was elected president of "
 	                  << president.country << " in " << president.year << ".\n";
     	}
+	}
+	{
+		cout << "\nemplace\n";
+		Vector<int> v = {1, 2, 5, 7, 8};
+		v.emplace(v.cbegin()+1, 4);
+		v.emplace(v.cbegin()+1, 3);
+		q(v);
+		cout << v.size() << " " << v.capacity() << endl;
 	}
 	{
 		

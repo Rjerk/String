@@ -8,6 +8,7 @@
 #include <memory>
 #include <algorithm>
 #include <iostream>
+#include "iterator.h"
 
 namespace mystl {
 
@@ -98,18 +99,17 @@ public:
 	void shrink_to_fit();
 	void clear() noexcept;
 
-	//iterator insert(const_iterator pos, T value);
-	iterator insert(iterator pos, const T& value);
-	// iterator insert(const_iterator pos, T&& value);
-	iterator insert(iterator pos, size_type count, const T& value);
+	iterator insert(const_iterator pos, const T& value);
+	iterator insert(const_iterator pos, T&& value);
+	iterator insert(const_iterator pos, size_type count, const T& value);
 
-	template <typename InputIt>
-	iterator insert(iterator pos, InputIt first, InputIt last);
+	template <typename InputIt, typename = std::enable_if_t<has_iterator_deref<T>::value>>
+	iterator insert(const_iterator pos, InputIt first, InputIt last);
 
-	iterator insert(iterator pos, std::initializer_list<T> ilist);
+	iterator insert(const_iterator pos, std::initializer_list<T> ilist);
 
 	template <typename... Args>
-	iterator emplace(iterator pos, Args&&... args);
+	iterator emplace(const_iterator pos, Args&&... args);
 
 	iterator erase(iterator pos);
 	iterator erase(iterator first, iterator last);
