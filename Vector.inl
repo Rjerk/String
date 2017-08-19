@@ -70,7 +70,7 @@ void Vector<T, Allocator>::expandCapacity(size_type new_cap)
 
 	auto new_elem = Allocator::allocate(new_cap);
 	auto new_free = new_elem;
-		
+
 	if (std::is_nothrow_move_constructible<value_type>()) {
 		for (auto iter = elements; iter != first_free; ++iter) {
 			new (new_free) (value_type)(std::move(*iter));

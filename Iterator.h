@@ -93,7 +93,7 @@ public:
 	template <class U> reverse_iterator& operator=(const reverse_iterator<U>& u);
 	Iterator base() const
 	{
-		return current; 
+		return current;
 	}
 	reference operator*() const
 	{
@@ -234,12 +234,12 @@ public:
 	}
 	back_insert_iterator<Container>& operator++()
 	{
-		
+
 		return *this;
 	}
 	back_insert_iterator<Container> operator++(int)
 	{
-		
+
 		return *this;
 	}
 protected:
@@ -352,105 +352,105 @@ auto begin(C& c) -> decltype(c.begin())
 template <typename C>
 auto begin(const C& c) -> decltype(c.begin())
 {
-	
+
 }
 
 template <typename C>
 auto end(C& c) -> decltype(c.end())
 {
-	
+
 }
 
 template <typename C>
 auto end(const C& c) -> decltype(c.end())
 {
-	
+
 }
 
 template <class T, size_t N>
 constexpr T* begin(T (&array)[N]) noexcept
 {
-	
+
 }
 
 template <class T, size_t N>
 constexpr T* end(T (&array)[N]) noexcept
 {
-	
+
 }
 
 template <class C>
 constexpr auto cbegin(const C& c) noexcept(noexcept(std::begin(c)))
 	-> decltype(std::begin(c))
 {
-	
+
 }
 
 template <class C>
 constexpr auto cend(const C& c) noexcept(noexcept(std::end(c)))
 	-> decltype(std::end(c))
 {
-	
+
 }
 
 template <class C>
 auto rbegin(C& c) -> decltype(c.rbegin())
 {
-	
+
 }
 
 template <class C>
 auto rbegin(const C& c) -> decltype(c.rbegin())
 {
-	
+
 }
 
 template <class C>
 auto rend(C& c) -> decltype(c.rend())
 {
-	
+
 }
 
 template <class C>
 auto rend(const C& c) -> decltype(c.rend())
 {
-	
+
 }
 
 template <class T, size_t N>
 reverse_iterator<T*> rbegin(T (&array)[N])
 {
-	
+
 }
 
 template <class T, size_t N>
 reverse_iterator<T*> rend(T (&array)[N])
 {
-	
+
 }
 
 template <class E>
 reverse_iterator<const E*> rbegin(std::initializer_list<E> il)
 {
-	
+
 }
 
 template <class E>
 reverse_iterator<const E*> rend(std::initializer_list<E> il)
 {
-	
+
 }
 
 template <class C>
 auto crbegin(const C& c) -> decltype(rbegin(c))
 {
-	
+
 }
 
 template <class C>
 auto crend(const C& c) -> decltype(rend(c))
 {
-	
+
 }
 
 
