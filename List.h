@@ -7,19 +7,18 @@
 #include <stdexcept>
 #include <algorithm>
 #include <utility>
+#include "Memory.h"
 
 namespace mystl {
 
 namespace list_detail {
 
-template <typename T>
-
-struct Node {
-
+struct ListNode {
 
 };
 
-class ListIterator: public iterator<bidirectional_iterator_tag,
+template <typename T>
+class ListIterator: private iterator<bidirectional_iterator_tag,
                                     T,
                                     std::ptrdiff_t,
                                     T*,
@@ -33,43 +32,42 @@ public:
 }
 
 template <typename T, typename Allocator = std::allocator<T>>
-class List : public Allocator {
+class List {
 public:
     using value_type = T;
     using allocator_type = Allocator;
     using size_type = std::size_t;
     using difference_type = std::ptrdiff_t;
     using reference = value_type&;
-    using const_reference = const reference;
-    using pointer = std::allocator_traits<Allocator>::pointer;
-    using pointer = std::allocator_traits<Allocator>::const_pointer;
-    using iterator = ListIterator<T>;
-    using iterator = ListIterator<const T>;
+    using const_reference = const value_type&;
+    using pointer = typename std::allocator_traits<Allocator>::pointer;
+    using const_pointer = typename std::allocator_traits<Allocator>::const_pointer;
+    using iterator = list_detail::ListIterator<T>;
+    using const_iterator = list_detail::ListIterator<const T>;
     using reverse_iterator = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<iterator>;
 private:
     iterator head;
     iterator tail;
 public:
-    List(): List(Allocator()) { }
-    explicit List(const Allocator& alloc);
+    explicit List(const Allocator& alloc = Allocator());
+    explicit List(size_type n);
     List(size_type count, const T& value, const Allocator& alloc = Allocator());
-    explicit List(size_type count, const Allocator& alloc = Allocator());
     template <class InputIterator>
         List(InputIterator first, InputIterator last, const Allocator& alloc = Allocator());
     List(const List& rhs);
-    List(const List& rhs, const Allocator& alloc);
+    //List(const List& rhs, const Allocator&);
     List(List&& rhs);
-    List(List&& rhs, const Allocator& alloc);
+    //List(List&& rhs, const Allocator&);
     List(std::initializer_list<T> init, const Allocator& alloc = Allocator());
     ~List();
 
-    List& operator=(const List& rhs);
-    List& operator=(List&& rhs);
+    List<T, Allocator>& operator=(const List<T, Allocator>& rhs);
+    List<T, Allocator>& operator=(List<T, Allocator>&& rhs);
     List& operator=(std::initializer_list<T>);
 
     template <class InputIterator>
-        void assign(InputIterator first InputIterator last);
+        void assign(InputIterator first, InputIterator last);
     void assign(size_type n, const T& t);
     void assgin(std::initializer_list<T> init);
 
@@ -101,10 +99,10 @@ public:
     const_reference back() const;
 
     template <class... Args> reference emplace_front(Args&&... args);
+    void pop_front();
     template <class... Args> reference emplace_back(Args&&... args);
     void push_front(const T& x);
     void push_front(T&& x);
-    void pop_front();
     void push_back(const T& x);
     void push_back(T&& x);
     void pop_back();
@@ -122,12 +120,14 @@ public:
     void swap(List& rhs);
     void clear() noexcept;
 
-    void splice(const_iterator pos, List& x);
-    void splice(const_iterator pos, List&& x);
-    void splice(const_iterator pos, List& x, const_iterator i);
-    void splice(const_iterator pos, List&& x, const_iterator i);
-    void splice(const_iterator pos, List& x, const_iterator first, const_iterator last);
-    void splice(const_iterator pos, List&& x, const_iterator first, const_iterator last);
+    void splice(const_iterator pos, List<T, Allocator>& x);
+    void splice(const_iterator pos, List<T, Allocator>&& x);
+    void splice(const_iterator pos, List<T, Allocator>& x, const_iterator i);
+    void splice(const_iterator pos, List<T, Allocator>&& x, const_iterator i);
+    void splice(const_iterator pos, List<T, Allocator>& x,
+                const_iterator first, const_iterator last);
+    void splice(const_iterator pos, List<T, Allocator>&& x,
+                const_iterator first, const_iterator last);
 
     void remove(const T& value);
     template <class Predicate> void remove_if(Predicate pred);
@@ -136,11 +136,11 @@ public:
     template <class BinaryPredicate>
         void unique(BinaryPredicate binary_pred);
 
-    void merge(List& x);
-    void merge(List&& x);
+    void merge(List<T, Allocator>& x);
+    void merge(List<T, Allocator>&& x);
 
-    template <class Compare> void merge(List& x, Compare comp);
-    template <class Compare> void merge(List&& x, Compare comp);
+    template <class Compare> void merge(List<T, Allocator>& x, Compare comp);
+    template <class Compare> void merge(List<T, Allocator>&& x, Compare comp);
 
     void sort();
     template <class Compare> void sort(Compare comp);

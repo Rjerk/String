@@ -144,10 +144,10 @@ public:
 		current += n;
 		return *this;
 	}
-//	typename Iterator::value_type operator[](difference_type n) const
-//	{
-//		return current[-n-1];
-//	}
+	typename Iterator::value_type operator[](difference_type n) const
+	{
+		return current[n-1];
+	}
 
 protected:
 	Iterator current;
