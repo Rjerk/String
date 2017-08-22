@@ -1,38 +1,59 @@
 #ifndef LIST_H
 #define LIST_H
 
-#include <memory>
 #include <initializer_list>
+#include <memory>
 #include <iterator>
 #include <stdexcept>
 #include <algorithm>
 #include <utility>
+
 #include "Memory.h"
+#include "Iterator.h" 
 
 namespace mystl {
 
 namespace list_detail {
 
+template <typename T>
 struct ListNode {
-
+	T value_;
+	ListNode * prev_;
+	ListNode * next_;
 };
 
-template <typename T>
-class ListIterator: private iterator<bidirectional_iterator_tag,
-                                    T,
-                                    std::ptrdiff_t,
-                                    T*,
-                                    T&>
-{
+template <typename T, typename Pot, typename Ref>
+class ListIterator {
 public:
-    ListIterator();
+	using iterator_category = bidirectional_iterator_tag;
+	using value_type = T;
+	using difference_type = std::ptrdiff_t;
+	using pointer = Pot;
+	using reference = Ref;
+	using node_type = ListNode<T>;
+	using this_type = ListIterator<T, Pot, Ref>;
 
+	this_type prev() const noexcept;
+	this_type next() const noexcept;
+
+    ListIterator() noexcept;
+    ListIterator(ListNode<T>* nodeptr) noexcept;
+    reference operator*() const noexcept;
+	pointer operator->() const noexcept;
+	ListIterator<T, Pot, Ref>& operator++() noexcept;
+	ListIterator<T, Pot, Ref>& operator++(int) noexcept;
+	ListIterator<T, Pot, Ref>& operator--() noexcept;
+	ListIterator<T, Pot, Ref>& operator--(int) noexcept;
+	bool operator==(const ListIterator<T, Pot, Ref>& rhs) const noexcept;
+	bool operator!=(const ListIterator<T, Pot, Ref>& rhs) const noexcept;
+private:
+	node_type* nodeptr_;
 };
 
 }
 
 template <typename T, typename Allocator = std::allocator<T>>
-class List {
+class List : private Allocator {
 public:
     using value_type = T;
     using allocator_type = Allocator;
@@ -42,23 +63,36 @@ public:
     using const_reference = const value_type&;
     using pointer = typename std::allocator_traits<Allocator>::pointer;
     using const_pointer = typename std::allocator_traits<Allocator>::const_pointer;
-    using iterator = list_detail::ListIterator<T>;
-    using const_iterator = list_detail::ListIterator<const T>;
+    using iterator = list_detail::ListIterator<T, T*, T&>;
+    using const_iterator = list_detail::ListIterator<T, const T*, const T&>;
     using reverse_iterator = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<iterator>;
+
+protected:
+	using node_type = list_detail::ListNode<T>;
+	using link_type = node_type *;
+	using NodeAllocator = std::allocator<node_type>;
+	NodeAllocator node_alloc;
+
+	link_type getNode();
+	void putNode(link_type p);
+	link_type createNode(const T& value);
+	void destroyNode(link_type p);
+	void emptyInitializer();
+
 private:
-    iterator head;
-    iterator tail;
+	link_type node_;
+    size_type size_;
+
 public:
     explicit List(const Allocator& alloc = Allocator());
     explicit List(size_type n);
     List(size_type count, const T& value, const Allocator& alloc = Allocator());
     template <class InputIterator>
-        List(InputIterator first, InputIterator last, const Allocator& alloc = Allocator());
+	List(InputIterator first, InputIterator last, const Allocator& alloc = Allocator());
+
     List(const List& rhs);
-    //List(const List& rhs, const Allocator&);
     List(List&& rhs);
-    //List(List&& rhs, const Allocator&);
     List(std::initializer_list<T> init, const Allocator& alloc = Allocator());
     ~List();
 
@@ -66,8 +100,7 @@ public:
     List<T, Allocator>& operator=(List<T, Allocator>&& rhs);
     List& operator=(std::initializer_list<T>);
 
-    template <class InputIterator>
-        void assign(InputIterator first, InputIterator last);
+    template <class InputIterator> void assign(InputIterator first, InputIterator last);
     void assign(size_type n, const T& t);
     void assgin(std::initializer_list<T> init);
 
@@ -148,42 +181,8 @@ public:
     void reverse() noexcept;
 };
 
-template <class T, class Allocator>
-bool operator==(const List<T, Allocator>& x, const List<T, Allocator>& y);
 
-template <class T, class Allocator>
-bool operator< (const List<T, Allocator>& x, const List<T, Allocator>& y);
-
-template <class T, class Allocator>
-bool operator!=(const List<T, Allocator>& x, const List<T, Allocator>& y)
-{
-    return !(x == y);
-}
-
-template <class T, class Allocator>
-bool operator> (const List<T, Allocator>& x, const List<T, Allocator>& y)
-{
-    return y < x;
-}
-
-template <class T, class Allocator>
-bool operator>=(const List<T, Allocator>& x, const List<T, Allocator>& y)
-{
-    return !(x < y);
-}
-
-template <class T, class Allocator>
-bool operator<=(const List<T, Allocator>& x, const List<T, Allocator>& y)
-{
-    return !(x > y);
-}
-
-template <class T, class Allocator>
-void swap(List<T, Allocator>& x, List<T, Allocator>& y)
-{
-    x.swap(y);
-}
+#include "List.inl"
 
 }
-
 #endif
