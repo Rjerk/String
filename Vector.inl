@@ -181,7 +181,7 @@ template <typename T, typename Allocator>
 typename Vector<T, Allocator>::allocator_type
 Vector<T, Allocator>::get_allocator() const
 {
-	return static_cast<const Allocator&>(*this);
+	return allocator_type();
 }
 
 template <typename T, typename Allocator>

@@ -183,6 +183,8 @@ int main()
 		cout << v.size() << " " << v.capacity() << endl;
 	}
 	{
-		
+		Vector<int> v = {1, 2};
+		auto alloc = v.get_allocator();
+		auto p = alloc.allocate(1);
 	}
 }

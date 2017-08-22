@@ -63,16 +63,18 @@ using RequireInputIterator =
 								>::type;
 
 template <typename InputIterator, class Distance>
-    void advance(InputIterator& i, Distance n);
+void advance(InputIterator& i, Distance n);
+
 template <typename InputIterator>
-    typename iterator_traits<InputIterator>::difference_type
-    distance(InputIterator first, InputIterator last);
+typename iterator_traits<InputIterator>::difference_type
+distance(InputIterator first, InputIterator last);
+
 template <typename ForwardIterator>
-    ForwardIterator next(ForwardIterator x,
-        typename iterator_traits<ForwardIterator>::difference_type n = 1);
+ForwardIterator next(ForwardIterator x, typename iterator_traits<ForwardIterator>::difference_type n = 1);
+
 template <typename BidirectionalIterator>
-    BidirectionalIterator prev(BidirectionalIterator x,
-        typename iterator_traits<BidirectionalIterator>::difference_type n = 1);
+BidirectionalIterator prev(BidirectionalIterator x,
+						   typename iterator_traits<BidirectionalIterator>::difference_type n = 1);
 
 template <typename Iterator>
 class reverse_iterator: public iterator<typename iterator_traits<Iterator>::iterator_category,
