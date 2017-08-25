@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include <utility>
+#include <functional>
 
 #include "Memory.h"
 #include "Iterator.h" 
@@ -18,26 +19,29 @@ namespace list_detail {
 template <typename T>
 struct ListNode {
 	T value_;
-	ListNode * prev_;
-	ListNode * next_;
+	ListNode<T>* prev_;
+	ListNode<T>* next_;
 };
 
 template <typename T, typename Pot, typename Ref>
 class ListIterator {
 public:
-	using iterator_category = bidirectional_iterator_tag;
+	using iterator_category = std::bidirectional_iterator_tag;
 	using value_type = T;
 	using difference_type = std::ptrdiff_t;
 	using pointer = Pot;
 	using reference = Ref;
+	using iterator = ListIterator<T, T*, T&>;
 	using node_type = ListNode<T>;
+	using link_type = ListNode<T>*;
 	using this_type = ListIterator<T, Pot, Ref>;
 
 	this_type prev() const noexcept;
 	this_type next() const noexcept;
 
     ListIterator() noexcept;
-    ListIterator(ListNode<T>* nodeptr) noexcept;
+    ListIterator(link_type nodeptr) noexcept;
+    ListIterator(const iterator& rhs) noexcept; // for iterator conversion.
     reference operator*() const noexcept;
 	pointer operator->() const noexcept;
 	ListIterator<T, Pot, Ref>& operator++() noexcept;
@@ -46,8 +50,8 @@ public:
 	ListIterator<T, Pot, Ref>& operator--(int) noexcept;
 	bool operator==(const ListIterator<T, Pot, Ref>& rhs) const noexcept;
 	bool operator!=(const ListIterator<T, Pot, Ref>& rhs) const noexcept;
-private:
-	node_type* nodeptr_;
+
+	link_type nodeptr_;
 };
 
 }
@@ -72,13 +76,14 @@ protected:
 	using node_type = list_detail::ListNode<T>;
 	using link_type = node_type *;
 	using NodeAllocator = std::allocator<node_type>;
-	NodeAllocator node_alloc;
+	NodeAllocator node_alloc_;
 
 	link_type getNode();
 	void putNode(link_type p);
 	link_type createNode(const T& value);
 	void destroyNode(link_type p);
 	void emptyInitializer();
+	void transfer(const_iterator pos, const_iterator first, const_iterator last);
 
 private:
 	link_type node_;
@@ -88,7 +93,7 @@ public:
     explicit List(const Allocator& alloc = Allocator());
     explicit List(size_type n);
     List(size_type count, const T& value, const Allocator& alloc = Allocator());
-    template <class InputIterator>
+    template <class InputIterator, typename = RequireInputIterator<InputIterator>>
 	List(InputIterator first, InputIterator last, const Allocator& alloc = Allocator());
 
     List(const List& rhs);
@@ -100,9 +105,11 @@ public:
     List<T, Allocator>& operator=(List<T, Allocator>&& rhs);
     List& operator=(std::initializer_list<T>);
 
-    template <class InputIterator> void assign(InputIterator first, InputIterator last);
+    template <class InputIterator, typename = RequireInputIterator<InputIterator>>
+	void assign(InputIterator first, InputIterator last);
+
     void assign(size_type n, const T& t);
-    void assgin(std::initializer_list<T> init);
+    void assign(std::initializer_list<T> init);
 
     allocator_type get_allocator() const noexcept;
 
@@ -140,13 +147,14 @@ public:
     void push_back(T&& x);
     void pop_back();
 
-    template <class... Args> iterator emplace(const iterator pos, Args&&... args);
+    template <class... Args> iterator emplace(const_iterator pos, Args&&... args);
     iterator insert(const_iterator pos, const T& x);
     iterator insert(const_iterator pos, T&& x);
     iterator insert(const_iterator pos, size_type n, const T& x);
-    template <class InputIterator>
-        iterator insert(const_iterator pos, InputIterator first, InputIterator last);
-    iterator insert(const_iterator pos, std::initializer_list<T> il);
+    template <class InputIterator, typename = RequireInputIterator<InputIterator>>
+    iterator insert(const_iterator pos, InputIterator first, InputIterator last);
+
+	iterator insert(const_iterator pos, std::initializer_list<T> il);
 
     iterator erase(const_iterator pos);
     iterator erase(const_iterator pos, const_iterator last);
@@ -163,15 +171,13 @@ public:
                 const_iterator first, const_iterator last);
 
     void remove(const T& value);
-    template <class Predicate> void remove_if(Predicate pred);
+    template <class UnaryPredicate> void remove_if(UnaryPredicate pred);
 
     void unique();
-    template <class BinaryPredicate>
-        void unique(BinaryPredicate binary_pred);
+    template <class BinaryPredicate> void unique(BinaryPredicate binary_pred);
 
     void merge(List<T, Allocator>& x);
     void merge(List<T, Allocator>&& x);
-
     template <class Compare> void merge(List<T, Allocator>& x, Compare comp);
     template <class Compare> void merge(List<T, Allocator>&& x, Compare comp);
 
@@ -180,7 +186,6 @@ public:
 
     void reverse() noexcept;
 };
-
 
 #include "List.inl"
 
