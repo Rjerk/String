@@ -2,7 +2,15 @@
 
 - [x] string
 - [x] vector
-- [ ] list
+- [x] list
+- [ ] forward_list
 - [ ] deque
-- [ ] iterator
-- [ ] allocator
+- [ ] stack
+- [ ] queue
+- [ ] priority_queue
+- [ ] map
+- [ ] set
+- [ ] B+ tree
+- [ ] circular buffer
+- [ ] bitmap
+
