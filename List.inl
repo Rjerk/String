@@ -583,6 +583,8 @@ void List<T, Allocator>::splice(const_iterator pos, List<T, Allocator>& x)
 	if (!x.empty()) {
 		transfer(pos, x.begin(), x.end());
 	}
+	size_ += x.size();
+	x.setSize(0);
 }
 
 template <typename T, typename Allocator>
@@ -592,14 +594,16 @@ void List<T, Allocator>::splice(const_iterator pos, List<T, Allocator>&& x)
 }
 
 template <typename T, typename Allocator>
-void List<T, Allocator>::splice(const_iterator pos, List<T, Allocator>&, const_iterator i)
+void List<T, Allocator>::splice(const_iterator pos, List<T, Allocator>& x, const_iterator i)
 {
-	iterator j = i;
+	auto j = i;
 	++j;
 	if (pos == i || pos == j) {
 		return ;
 	}
 	transfer(pos, i, j);
+	size_ += 1;
+	x.setSize(x.size()-1);
 }
 
 template <typename T, typename Allocator>
@@ -675,12 +679,18 @@ void List<T, Allocator>::unique(BinaryPredicate binary_pred)
 template <typename T, typename Allocator>
 void List<T, Allocator>::merge(List<T, Allocator>& x)
 {
+	if (this == &x) {
+		return ;
+	}
 	merge(x, std::less<T>());
 }
 
 template <typename T, typename Allocator>
 void List<T, Allocator>::merge(List<T, Allocator>&& x)
 {
+	if (this == &x) {
+		return ;
+	}
 	merge(std::move(x), std::less<T>());
 }
 
@@ -688,6 +698,9 @@ template <typename T, typename Allocator>
 template <class Compare>
 void List<T, Allocator>::merge(List<T, Allocator>& x, Compare comp)
 {
+	if (this == &x) {
+		return ;
+	}
 	auto p = cbegin(), q = x.cbegin();
 	while (p != cend() && q != x.cend()) {
 		if (comp(*p, *q)) {
@@ -702,12 +715,18 @@ void List<T, Allocator>::merge(List<T, Allocator>& x, Compare comp)
 	if (q != x.cend()) { // move the rest of x to the end of list.
 		transfer(cend(), q, x.cend());
 	}
+	
+	size_ += x.size();
+	x.setSize(0);
 }
 
 template <typename T, typename Allocator>
 template <class Compare>
 void List<T, Allocator>::merge(List<T, Allocator>&& x, Compare comp)
 {
+	if (this == &x) {
+		return ;
+	}
 	merge(std::move(x), comp);
 }
 
