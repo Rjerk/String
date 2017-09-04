@@ -3,6 +3,7 @@
 #include "../String.h"
 #include "../Vector.h"
 #include <list>
+#include <cassert>
 
 using namespace mystl;
 using std::cout;
@@ -136,5 +137,19 @@ int main()
 		li.splice(++li.cbegin(), tmp); // undo: change size().
 		q(li);
 		q(tmp);
+		
+		tmp.assign({-2, -1});
+		q(tmp);
+		li.splice(li.cbegin(), tmp, tmp.cbegin());
+		q(li);
+		q(tmp);
+	}
+	{
+		cout << "\nmerge test.\n";
+		List<int> l1{1, 2, 3};
+		List<int> l2{5, 6, 7};
+		l1.merge(l2);
+		q(l1);
+		q(l2);
 	}
 }

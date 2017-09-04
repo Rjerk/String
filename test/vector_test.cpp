@@ -1,6 +1,7 @@
 #include "../Vector.h"
 
 #include <iostream>
+#include <cassert>
 
 using std::cout;
 using std::endl;
@@ -12,6 +13,14 @@ void q(const Vector<int>& v) { cout << v << "\n"; }
 
 int main()
 {
+	{
+		Vector<int> vi{1, 2, 3};
+		vi.push_back(vi.front());
+		q(vi); 
+	}
+	{
+		assert(sizeof(Vector<int>) == 3 * sizeof(void*));
+	}
 	{
 		cout << "constructor:\n";
 		Vector<int> v1;
