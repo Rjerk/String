@@ -45,6 +45,9 @@ int main()
 		assert(mystl::adjacent_find(vi.cbegin(), vi.cend()) == vi.cbegin()+1);
 		assert(mystl::adjacent_find(vi.cbegin(), vi.cend(), [](int i, int j){ return i > j; }) == vi.cend());
 	}
+	{ // copy_backward
+		
+	}
 	{ // sort
 		Vector<int> vi{5, -1, 0, 2};
 		mystl::sort(vi.begin(), vi.end());

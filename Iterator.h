@@ -62,6 +62,11 @@ using RequireInputIterator =
 													std::input_iterator_tag>::value
 								>::type;
 
+template <typename U, typename T>
+using RequireConvertible = 
+		typename std::enable_if<std::is_convertible<U, T>::value>::type;
+
+
 template <typename InputIterator, class Distance>
 void advance(InputIterator& i, Distance n);
 
