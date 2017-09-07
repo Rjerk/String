@@ -80,10 +80,6 @@ InputIterator find_if_not(InputIterator first, InputIterator last, Predicate pre
 }
 
 
-
-
-
-
 template<class ForwardIterator>
 ForwardIterator adjacent_find(ForwardIterator first, ForwardIterator last)
 {
@@ -107,7 +103,12 @@ ForwardIterator adjacent_find(ForwardIterator first, ForwardIterator last, Binar
 }
 
 
+template<class BidirectionalIterator1, class BidirectionalIterator2>
+BidirectionalIterator2 copy_backward(BidirectionalIterator1 first,
+									 BidirectionalIterator1 last, BidirectionalIterator2 result)
+{
 
+}
 
 
 namespace {

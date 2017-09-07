@@ -99,8 +99,11 @@ ForwardIterator adjacent_find(ForwardIterator first, ForwardIterator last, Binar
 //template<class InputIterator, class OutputIterator, class Predicate>
 //OutputIterator copy_if(InputIterator first, InputIterator last, OutputIterator result, Predicate pred);
 //
-//template<class BidirectionalIterator1, class BidirectionalIterator2>
-//BidirectionalIterator2 copy_backward( BidirectionalIterator1 first, BidirectionalIterator1 last, BidirectionalIterator2 result);
+
+template<class BidirectionalIterator1, class BidirectionalIterator2>
+BidirectionalIterator2 copy_backward(BidirectionalIterator1 first,
+									 BidirectionalIterator1 last, BidirectionalIterator2 result);
+
 //
 //template<class InputIterator, class OutputIterator>
 //OutputIterator move(InputIterator first, InputIterator last, OutputIterator result);
