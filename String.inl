@@ -79,7 +79,7 @@ String::~String() noexcept
 
 String& String::operator=(String rhs)
 {
-	this->swap(rhs);
+	swap(rhs);
 	return *this;
 }
 
@@ -95,7 +95,7 @@ String& String::operator=(const char* s)
 String& String::operator=(char ch)
 {
 	if (capacity_ > 0) {
-		this->clear();
+		clear();
 	} else {
 		data_ = new char(1);
 		capacity_ = 1;
@@ -109,7 +109,7 @@ String& String::operator=(std::initializer_list<char> ilist)
 {
 	if (capacity_ < ilist.size())
 		reallocate(ilist.size());
-	memset(data_, char(), size_);
+	::memset(data_, char(), size_);
 	size_type j = 0;
 	for (auto i : ilist)
 		data_[j++] = i;
@@ -119,7 +119,7 @@ String& String::operator=(std::initializer_list<char> ilist)
 // assign
 String& String::assign(size_type count, char ch)
 {
-	if (count > maxsize_)
+	if (count > max_size())
 		throw std::length_error("String::assign");
 	if (count > capacity_)
 		reallocate(count);
@@ -129,14 +129,14 @@ String& String::assign(size_type count, char ch)
 
 String& String::assign(const String& str)
 {
-	return this->assign(str, 0, str.size());
+	return assign(str, 0, str.size());
 }
 
 String& String::assign(const String& str, size_type pos, size_type count)
 {
 	if (pos > str.size())
 		throw std::out_of_range("String::assign");
-	if (pos + count > maxsize_)
+	if (pos + count > max_size())
 		throw std::length_error("String::assign");
 	count = (pos + count > str.size() ? (str.size() - pos) : count);
 	if (count > size_)
@@ -147,7 +147,7 @@ String& String::assign(const String& str, size_type pos, size_type count)
 
 String& String::assign(String&& str) noexcept
 {
-	this->swap(str);
+	swap(str);
 	str.data_ = nullptr;
 	return *this;
 }
@@ -163,7 +163,7 @@ String& String::assign(const char* s, size_type count)
 
 String& String::assign(const char* s)
 {
-	return this->assign(s, strlen(s));
+	return assign(s, strlen(s));
 }
 
 // Iterators
@@ -180,7 +180,7 @@ String::iterator String::end() noexcept
 // Capacity
 void String::reserve(size_type new_cap)
 {
-	if (new_cap > maxsize_)
+	if (new_cap > max_size())
 		throw std::length_error("String::reserve");
 	if (new_cap <= capacity_ || new_cap <= size_)
 		return ;
@@ -214,7 +214,7 @@ String& String::insert(size_type index, size_type count, char ch)
 {
 	if (index > size_)
 		throw std::out_of_range("String::insert");
-	if (size_+count > maxsize_)
+	if (size_+count > max_size())
 		throw std::length_error("String::insert");
 	size_type pos = size_-1;
 	size_ = size_ + count;
@@ -230,7 +230,7 @@ String& String::insert(size_type index, size_type count, char ch)
 
 String& String::insert(size_type index, const char* s)
 {
-	return this->insert(index, s, strlen(s));
+	return insert(index, s, strlen(s));
 }
 
 String& String::insert(size_type index, const char* s, size_type count)
@@ -252,14 +252,14 @@ String& String::insert(size_type index, const char* s, size_type count)
 
 String& String::insert(size_type index, const String& str)
 {
-	return this->insert(index, str.c_str(), str.size());
+	return insert(index, str.c_str(), str.size());
 }
 
 String& String::insert(size_type index, const String& str, size_type index_str, size_type count)
 {
 	if (index > this->size() || index_str > this->size())
 		throw std::out_of_range("String::insert");
-	return this->insert(index, str.substr(index_str, count));
+	return insert(index, str.substr(index_str, count));
 }
 
 String::iterator String::insert(iterator pos, char ch)
@@ -298,7 +298,7 @@ String& String::erase(size_type index, size_type count)
 
 String::iterator String::erase(iterator pos)
 {
-	return this->erase(pos, pos+1);
+	return erase(pos, pos+1);
 }
 
 String::iterator String::erase(iterator first, iterator last)
@@ -315,7 +315,7 @@ String::iterator String::erase(iterator first, iterator last)
 
 void String::push_back(char ch)
 {
-	if (size_+1 > maxsize_)
+	if (size_+1 > max_size())
 		throw std::length_error("String::push_back");
 	++size_;
 	if (size_ > capacity_)
@@ -330,7 +330,7 @@ void String::pop_back()
 
 String& String::append(size_type count, char ch)
 {
-	if (size_ + count > maxsize_)
+	if (size_ + count > max_size())
 		throw std::length_error("String::append");
 	size_type pos = size_;
 	size_ += count;
@@ -344,14 +344,14 @@ String& String::append(size_type count, char ch)
 
 String& String::append(const String& str)
 {
-	return this->append(str, 0, str.size());
+	return append(str, 0, str.size());
 }
 
 String& String::append(const String& str, size_type pos, size_type count)
 {
 	if (pos > str.size())
 		throw std::out_of_range("String::append");
-	if (size_ + count > maxsize_)
+	if (size_ + count > max_size())
 		throw std::length_error("String::append");
 	size_type sz = size_;
 	count = (pos + count > str.size() ? (str.size() - pos) : count);
@@ -365,7 +365,7 @@ String& String::append(const String& str, size_type pos, size_type count)
 
 String& String::append(const char* s, size_type count)
 {
-	if (size_ + count > maxsize_)
+	if (size_ + count > max_size())
 		throw std::length_error("String::append");
 	size_type sz = size_;
 	size_ += count;
@@ -377,28 +377,28 @@ String& String::append(const char* s, size_type count)
 
 String& String::append(const char* s)
 {
-	return this->append(s, strlen(s));
+	return append(s, strlen(s));
 }
 
 String& String::operator+=(const String& rhs)
 {
-	return this->append(rhs);
+	return append(rhs);
 }
 
 String& String::operator+=(char c)
 {
-	return this->append(1, c);
+	return append(1, c);
 }
 
 String& String::operator+=(const char* s)
 {
-	return this->append(s);
+	return append(s);
 }
 
 String& String::operator+=(std::initializer_list<char> ilist)
 {
 	String tmp(ilist);
-	return this->append(tmp);
+	return append(tmp);
 }
 
 int String::compare(const String& rhs) const noexcept
@@ -421,12 +421,12 @@ int String::compare(const String& rhs) const noexcept
 
 int String::compare(size_type pos1, size_type count1, const String& str) const
 {
-	return this->compare(pos1, count1, str, 0, str.size());
+	return compare(pos1, count1, str, 0, str.size());
 }
 
 int String::compare(size_type pos1, size_type count1, const String& str, size_type pos2, size_type count2) const
 {
-	return (this->substr(pos1, count1)).compare(str.substr(pos2, count2));
+	return (substr(pos1, count1)).compare(str.substr(pos2, count2));
 }
 
 int String::compare(const char* s) const
@@ -448,7 +448,7 @@ int String::compare(const char* s) const
 
 int String::compare(size_type pos1, size_type count1, const char* s) const
 {
-	return this->compare(pos1, count1, s, strlen(s));
+	return compare(pos1, count1, s, strlen(s));
 }
 
 int String::compare(size_type pos1, size_type count1, const char* s, size_type count2) const
@@ -456,38 +456,38 @@ int String::compare(size_type pos1, size_type count1, const char* s, size_type c
 	if (pos1 > this->size())
 		throw std::out_of_range("String::compare");
 	String tmp(s, count2);
-	return this->substr(pos1, count1).compare(tmp);
+	return substr(pos1, count1).compare(tmp);
 }
 
 String& String::replace(size_type pos, size_type count, const String& str)
 {
-	return this->replace(pos, count, str, 0, str.size());
+	return replace(pos, count, str, 0, str.size());
 }
 
 String& String::replace(size_type pos1, size_type count1, const String& str, size_type pos2, size_type count2)
 {
 	if (pos1 > this->size() || pos2 > str.size())
 		throw std::out_of_range("String::replace");
-	return this->erase(pos1, count1).insert(pos1, str, pos2, count2);
+	return erase(pos1, count1).insert(pos1, str, pos2, count2);
 }
 
 String& String::replace(size_type pos1, size_type count1, const char* cstr, size_type count2)
 {
 	if (pos1 > this->size())
 		throw std::out_of_range("String::replace");
-	return this->erase(pos1, count1).insert(pos1, cstr, count2);
+	return erase(pos1, count1).insert(pos1, cstr, count2);
 }
 
 String& String::replace(size_type pos, size_type count, const char* cstr)
 {
-	return this->replace(pos, count, cstr, strlen(cstr));
+	return replace(pos, count, cstr, strlen(cstr));
 }
 
 String& String::replace(size_type pos1, size_type count1, size_type count2, char ch)
 {
 	if (pos1 > this->size())
 		throw std::out_of_range("String::replace");
-	return this->erase(pos1, count1).insert(pos1, count2, ch);
+	return erase(pos1, count1).insert(pos1, count2, ch);
 }
 
 String String::substr(size_type pos, size_type count) const
@@ -510,14 +510,14 @@ String::size_type String::copy(char* dest, size_type count, size_type pos) const
 
 void String::resize(size_type count)
 {
-	if (count > maxsize_)
+	if (count > max_size())
 		throw std::length_error("String::resize(size_type count)");
 	resize(count, char());
 }
 
 void String::resize(size_type count, char ch)
 {
-	if (count > maxsize_)
+	if (count > max_size())
 		throw std::length_error("String::resize(size_type count, char ch)");
 	if (count == size_) {
 		return ;
@@ -549,14 +549,14 @@ void String::swap(String& rhs) noexcept
 
 String::size_type String::find(const String& str, size_type pos) const
 {
-	return this->find(str.data(), pos, str.size());
+	return find(str.data(), pos, str.size());
 }
 
 String::size_type String::find(const char* s, size_type pos, size_type count) const
 {
 	if (pos < size_) {
-		for (size_type i = pos; i+count <= this->size(); ++i) {
-			if (this->compare(i, count, s, count) == 0)
+		for (size_type i = pos; i+count <= size(); ++i) {
+			if (compare(i, count, s, count) == 0)
 				return i;
 		}
 	}
@@ -565,13 +565,13 @@ String::size_type String::find(const char* s, size_type pos, size_type count) co
 
 String::size_type String::find(const char* s, size_type pos) const
 {
-	return this->find(s, pos, strlen(s));
+	return find(s, pos, strlen(s));
 }
 
 String::size_type String::find(char ch, size_type pos) const
 {
-	if (pos < this->size()) {
-		for (size_type i = pos; i < this->size(); ++i)
+	if (pos < size()) {
+		for (size_type i = pos; i < size(); ++i)
 			if (data_[i] == ch)
 				return i;
 	}
@@ -580,7 +580,7 @@ String::size_type String::find(char ch, size_type pos) const
 
 String::size_type String::rfind(const String& str, size_type pos) const
 {
-	return this->rfind(str.data(), pos, str.size());
+	return rfind(str.data(), pos, str.size());
 }
 
 String::size_type String::rfind(const char* s, size_type pos, size_type count) const
@@ -589,7 +589,7 @@ String::size_type String::rfind(const char* s, size_type pos, size_type count) c
 		if (pos >= size_) pos = size_ - 1;
 		if (count > size_) count = size_;
 		for (size_type i = pos-count+1; i >= 0; --i) {
-			if (this->compare(i, count, s, count) == 0)
+			if (compare(i, count, s, count) == 0)
 				return i;
 		}
 	}
@@ -598,7 +598,7 @@ String::size_type String::rfind(const char* s, size_type pos, size_type count) c
 
 String::size_type String::rfind(const char* s, size_type pos) const
 {
-	return this->rfind(s, pos, strlen(s));
+	return rfind(s, pos, strlen(s));
 }
 
 String::size_type String::rfind(char ch, size_type pos) const
@@ -615,7 +615,7 @@ String::size_type String::rfind(char ch, size_type pos) const
 
 String::size_type String::find_first_of(const String& str, size_type pos) const
 {
-	return this->find_first_of(str.data(), pos, str.size());
+	return find_first_of(str.data(), pos, str.size());
 }
 
 String::size_type String::find_first_of(const char* s, size_type pos, size_type count) const
@@ -634,17 +634,17 @@ String::size_type String::find_first_of(const char* s, size_type pos, size_type 
 
 String::size_type String::find_first_of(const char* s, size_type pos) const
 {
-	return this->find_first_of(s, pos, strlen(s));
+	return find_first_of(s, pos, strlen(s));
 }
 
 String::size_type String::find_first_of(char ch, size_type pos) const
 {
-	return this->find(ch, pos);
+	return find(ch, pos);
 }
 
 String::size_type String::find_first_not_of(const String& str, size_type pos) const
 {
-	return this->find_first_not_of(str.data(), pos, str.size());
+	return find_first_not_of(str.data(), pos, str.size());
 }
 
 String::size_type String::find_first_not_of(const char* s, size_type pos, size_type count) const
@@ -668,7 +668,7 @@ String::size_type String::find_first_not_of(const char* s, size_type pos, size_t
 
 String::size_type String::find_first_not_of(const char* s, size_type pos) const
 {
-	return this->find_first_not_of(s, pos, strlen(s));
+	return find_first_not_of(s, pos, strlen(s));
 }
 
 String::size_type String::find_first_not_of(char ch, size_type pos) const
@@ -683,7 +683,7 @@ String::size_type String::find_first_not_of(char ch, size_type pos) const
 
 String::size_type String::find_last_of(const String& str, size_type pos) const
 {
-	return this->find_last_of(str.data(), pos, str.size());
+	return find_last_of(str.data(), pos, str.size());
 }
 
 String::size_type String::find_last_of(const char* s, size_type pos, size_type count) const
@@ -703,17 +703,17 @@ String::size_type String::find_last_of(const char* s, size_type pos, size_type c
 
 String::size_type String::find_last_of(const char* s, size_type pos) const
 {
-	return this->find_last_of(s, pos, strlen(s));
+	return find_last_of(s, pos, strlen(s));
 }
 
 String::size_type String::find_last_of(char ch, size_type pos) const
 {
-	return this->rfind(ch, pos);
+	return rfind(ch, pos);
 }
 
 String::size_type String::find_last_not_of(const String& str, size_type pos) const
 {
-	return this->find_last_not_of(str.data(), pos, str.size());
+	return find_last_not_of(str.data(), pos, str.size());
 }
 
 String::size_type String::find_last_not_of(const char* s, size_type pos, size_type count) const
@@ -739,7 +739,7 @@ String::size_type String::find_last_not_of(const char* s, size_type pos, size_ty
 
 String::size_type String::find_last_not_of(const char* s, size_type pos) const
 {
-	return this->find_last_not_of(s, pos, strlen(s));
+	return find_last_not_of(s, pos, strlen(s));
 }
 
 String::size_type String::find_last_not_of(char ch, size_type pos) const
@@ -765,7 +765,7 @@ void String::reallocate(size_type sz)
 	while (capacity_ <= sz) {
 		capacity_ += (capacity_ >> 1);
 	}
-	if (capacity_ > maxsize_)
+	if (capacity_ > max_size())
 		throw std::length_error("String::reallocate(size_type size)");
 	char* tmp = new char[capacity_];
 	memcpy(tmp, data_, size_);
@@ -935,7 +935,7 @@ void swap(String& lhs, String& rhs) noexcept
 std::ostream& operator<<(std::ostream& os, const String& rhs)
 {
 	for (String::size_type i = 0; i < rhs.size(); ++i)
-		os << rhs.data_[i];
+		os << rhs[i];
 	return os;
 }
 

@@ -10,7 +10,6 @@
 namespace mystl {
 
 class String {
-	friend std::ostream& operator<<(std::ostream& os, const String& rhs);
 public:
 	using size_type = std::uint32_t;
 	using iterator = char *;
@@ -41,16 +40,16 @@ public:
 public:
 	// Element access
 	char& at(size_type pos) { if (pos > size()) throw std::out_of_range("String::at"); return data_[pos]; }
-	const char& at(size_type pos) const { if (pos > size()) throw std::out_of_range("String::at"); return static_cast<const char&>(data_[pos]); }
+	const char& at(size_type pos) const { if (pos > size()) throw std::out_of_range("String::at"); return data_[pos]; }
 	char& operator[](size_type pos) { return data_[pos]; }
 	const char& operator[](size_type pos) const { return data_[pos]; }
 	char front() { return data_[0]; }
 	const char front() const { return data_[0]; }
 	char back() { return data_[size_-1]; }
 	const char back() const { return data_[size_-1]; }
-	const char* data() const { return static_cast<const char*>(data_); }
+	const char* data() const { return data_; }
 	char* data() { return data_;}
-	const char* c_str() const { data_[size_] = '\0'; return static_cast<const char*>(data_); }
+	const char* c_str() const { data_[size_] = '\0'; return data_; }
 	// Iterators
 	iterator begin() noexcept;
 	iterator end() noexcept;
@@ -58,7 +57,7 @@ public:
 	bool empty() const { return size_ == 0; }
 	size_type size() const { return size_; }
 	size_type length() const { return size_; }
-	size_type max_size() const { return maxsize_; }
+	size_type max_size() const { return static_cast<size_type>(-1) / sizeof(char) - 1; }
 	void reserve(size_type new_cap = 0);
 	size_type capacity() const { return capacity_; }
 	void shrink_to_fit();
@@ -135,7 +134,6 @@ private:
 	size_type size_;
 	size_type capacity_;
 	char* data_;
-	static const size_type maxsize_ = static_cast<size_type>(-1) / sizeof(char) - 1;
 };
 
 String operator+(const String& lhs, const String& rhs);
