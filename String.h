@@ -13,7 +13,7 @@ class String {
 public:
 	using size_type = std::uint32_t;
 	using iterator = char *;
-	// Constructor
+
 	String();
 	String(const String& other);
 	String(String&& other);
@@ -24,7 +24,7 @@ public:
 	String(size_type count, char ch);
 	String(iterator first, iterator last);
 	String(std::initializer_list<char> init);
-	// Destructor
+
 	~String() noexcept;
 	String& operator=(String str);
 	String& operator=(const char* s);
@@ -44,9 +44,9 @@ public:
 	char& operator[](size_type pos) { return data_[pos]; }
 	const char& operator[](size_type pos) const { return data_[pos]; }
 	char front() { return data_[0]; }
-	const char front() const { return data_[0]; }
+	char front() const { return data_[0]; }
 	char back() { return data_[size_-1]; }
-	const char back() const { return data_[size_-1]; }
+	char back() const { return data_[size_-1]; }
 	const char* data() const { return data_; }
 	char* data() { return data_;}
 	const char* c_str() const { data_[size_] = '\0'; return data_; }
@@ -183,7 +183,7 @@ String to_string(float value);
 String to_string(double value);
 String to_string(long double value);
 
-#include "String.inl"
+#include "string.inl"
 }
 
 #endif

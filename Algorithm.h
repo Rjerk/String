@@ -454,6 +454,6 @@ ForwardIterator is_sorted_until(ForwardIterator first, ForwardIterator last, Com
 
 }
 
-#include "Algorithm.inl"
+#include "algorithm.inl"
 
 #endif

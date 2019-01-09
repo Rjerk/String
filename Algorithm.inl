@@ -3,43 +3,23 @@
 
 namespace mystl {
 
+// checks that a predicate is true for all the elements of a sequence
 template <class InputIterator, class Predicate>
 bool all_of(InputIterator first, InputIterator last, Predicate pred)
 {
-	if (first != last) {
-		while (first != last) {
-			if (!pred(*first++)) {
-				return false;
-			}
-		}
-	}
-	return true;
+  return find_if_not(first, last, pred) == last;
 }
 
 template <class InputIterator, class Predicate>
 bool any_of(InputIterator first, InputIterator last, Predicate pred)
 {
-	if (first != last) {
-		while (first != last) {
-			if (pred(*first++)) {
-				return true;
-			}
-		}
-	}
-	return false;
+  return none_of(first, last, pred);
 }
 
 template <class InputIterator, class Predicate>
 bool none_of(InputIterator first, InputIterator last, Predicate pred)
 {
-	if (first != last) {
-		while (first != last) {
-			if (pred(*first++)) {
-				return false;
-			}
-		}
-	}
-	return true;
+  return find_if(first, last, pred) == last;
 }
 
 template<class InputIterator, class Function>
@@ -68,8 +48,8 @@ InputIterator find_if(InputIterator first, InputIterator last, Predicate pred)
 	return last;
 }
 
-template<class InputIterator, class Predicate>
-InputIterator find_if_not(InputIterator first, InputIterator last, Predicate pred)
+template<class InputIterator, class UnaryPredicate>
+InputIterator find_if_not(InputIterator first, InputIterator last, UnaryPredicate pred)
 {
 	for ( ; first != last; ++first) {
 		if (!pred(*first)) {
@@ -84,7 +64,7 @@ template<class ForwardIterator>
 ForwardIterator adjacent_find(ForwardIterator first, ForwardIterator last)
 {
 	if (first != last) {
-		return mystl::adjacent_find(first, last, std::equal_to<decltype(*first)>());
+		return adjacent_find(first, last, std::equal_to<decltype(*first)>());
 	}
 	return last;
 }
@@ -114,6 +94,8 @@ BidirectionalIterator2 copy_backward(BidirectionalIterator1 first,
 namespace {
 
 constexpr std::ptrdiff_t __threshold = 16;
+
+// find the median of three values
 template <typename T>
 const T& __median(const T& a, const T& b, const T& c)
 {
@@ -130,32 +112,126 @@ const T& __median(const T& a, const T& b, const T& c)
 	}
 }
 
-template <typename RandomAccessIterator, typename T>
-RandomAccessIterator __unguarded_partition( RandomAccessIterator first,
-											RandomAccessIterator last, const T& pivot)
+template <typename RandomAccessIterator, typename Compare>
+RandomAccessIterator __unguarded_partition(RandomAccessIterator first,
+											                     RandomAccessIterator last,
+                                           RandomAccessIterator pivot,
+                                           Compare comp)
 {
-	for ( ; ; ) {
-		while (*first < pivot) { ++first; }
+	while (true) {
+
+		while (comp(first, pivot)) {
+      ++first;
+    }
 		--last;
-		while (*last > pivot) {	--last;	}
-		if (!(first < last)) { return first; }
-		std::swap(*first, *last);
-		++first;
+
+		while (comp(last, pivot)) {
+      --last;
+    }
+
+		if (!(first < last)) {
+      return first;
+    }
+		std::iter_swap(*first, *last);
+		++first; // comp(first, pivot) is true
 	}
 }
 
-template <typename RandomAccessIterator, typename Size>
+template <typename Iterator, typename Compare>
+void __move_median_to_first(Iterator result,
+                            Iterator a, Iterator b, Iterator c,
+                            Compare comp)
+{
+  if (comp(a, b)) {
+    if (comp(b, c)) {
+      std::iter_swap(result, b);
+    } else if (comp(a, c)) {
+      std::iter_swap(result, c);
+    } else {
+      std::iter_swap(result, a);
+    }
+  } else if (comp(a, c)) {
+    std::iter_swap(result, a);
+  } else if (comp(b, c)) {
+    std::iter_swap(result, c);
+  } else {
+    std::iter_swap(result, b);
+  }
+}
+
+template <typename RandomAccessIterator, typename Compare>
+RandomAccessIterator __unguarded_partition(RandomAccessIterator first,
+                                           RandomAccessIterator last,
+                                           Compare comp)
+{
+  auto mid = first + (last - first) / 2;
+  __move_median_to_first(first, first+1, mid, last-1, comp);
+  return __unguarded_partition(first+1, last, first, comp);
+}
+
+template <typename RandomAccessIterator, typename Compare>
+void __partial_sort(RandomAccessIterator first,
+                           RandomAccessIterator middle,
+                           RandomAccessIterator last,
+                           Compare comp)
+{
+  __heap_select(first, middle, last, comp);
+  __sort_heap(first, middle, comp);
+}
+
+template <typename RandomAccessIterator, typename Compare>
+void __heap_select(RandomAccessIterator first,
+                   RandomAccessIterator middle,
+                   RandomAccessIterator last,
+                   Compare comp)
+{
+  __make_heap(first, middle, comp);
+  for (RandomAccessIterator i = middle; i < last; ++i) {
+    if (comp(i, first)) {
+      __pop_heap(first, middle, i, comp);
+    }
+  }
+}
+
+template <typename RandomAccessIterator, typename Compare>
+void __pop_heap(RandomAccessIterator first, 
+                RandomAccessIterator last,
+                RandomAccessIterator result, 
+                Compare& comp)
+{
+  using ValueType = typename std::iterator_traits<RandomAccessIterator>::value_type;
+  using DistanceType = typename std::iterator_traits<RandomAccessIterator>::difference_type;
+
+  ValueType value = std::move(*result);
+  *result = std::move(*first);
+  __adjust_heap(first, DistanceType(0), _DistanceType(last - first), std::move(value), comp);
+}
+
+template <typename RandomAccessIterator, typename Compare>
+void __sort_heap(RandomAccessIterator first, 
+                 RandomAccessIterator last,
+                 Compare& comp)
+{
+  while (last - first > 1) {
+    --last;
+    __pop_heap(first, last, last, comp);
+  }
+}
+
+template <typename RandomAccessIterator, typename Size, typename Compare>
 void __introsort_loop(RandomAccessIterator first,
-					  RandomAccessIterator last, Size depth_limit)
+					            RandomAccessIterator last,
+                      Size depth_limit,
+                      Compare comp)
 {
 	while (last - first > __threshold) {
 		if (depth_limit == 0) {
-			std::partial_sort(first, last, last);
+			__partial_sort(first, last, last, comp);
 			return ;
 		}
 		--depth_limit;
-		auto cut = __unguarded_partition(first, last, __median(*first, *(first + (last - first) / 2), *(last - 1)));
-		__introsort_loop(cut, last, depth_limit);
+		auto cut = __unguarded_partition(first, last, comp);
+		__introsort_loop(cut, last, depth_limit, comp);
 		last = cut;
 	}
 }
@@ -248,13 +324,13 @@ void sort(RandomAccessIterator first, RandomAccessIterator last, Compare comp)
 template<class ForwardIterator>
 bool is_sorted(ForwardIterator first, ForwardIterator last)
 {
-	return mystl::is_sorted_until(first, last) == last;
+	return is_sorted_until(first, last) == last;
 }
 
 template<class ForwardIterator, class Compare>
 bool is_sorted(ForwardIterator first, ForwardIterator last, Compare comp)
 {
-	return mystl::is_sorted_until(first, last, comp) == last;
+	return is_sorted_until(first, last, comp) == last;
 }
 
 template<class ForwardIterator>
@@ -270,7 +346,5 @@ ForwardIterator is_sorted_until(ForwardIterator first, ForwardIterator last, Com
 	auto it = mystl::adjacent_find(first, last, std::bind(comp, _2, _1));
 	return it == last ? last : std::next(it);
 }
-
-
 
 }
